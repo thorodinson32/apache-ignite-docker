@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  ignite:
+    image: "apacheignite/ignite"
+    hostname: ignite
+    environment:
+      USER_LIBS: /libs/user_libs
+      CONFIG_URI: file:/config/ignite-config.xml
+      IGNITE_QUIET: "false"
+    volumes:
+    - ./libs:/opt/ignite/apache-ignite/libs/user_libs
+    - ./config:/config:ro
+    network_mode: host
+    ports:
+     - "10800:10800"
+     - "11211:11211"
+     - "47500-47509:47500-47509"
+    restart: unless-stopped

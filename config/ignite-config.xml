@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /* ignite-conf-azure.xml
+  ~  * Copyright 2020 AutoZone, Inc.
+  ~  * Content is confidential to and proprietary information of AutoZone, Inc., its
+  ~  * subsidiaries and affiliates.
+  ~  */
+  -->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+        <property name="rebalanceThreadPoolSize" value="3"/>
+        <!-- Overall Ignite Cacheing Service setup -->
+        <property name="igniteInstanceName"
+                  value="riversand-yes-percent-listener-cache"/>
+        <property name="clientMode" value="false"/>
+        <!-- Enabling Apache Ignite Persistent Store. -->
+        <property name="dataStorageConfiguration">
+            <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+                <property name="defaultDataRegionConfiguration">
+                    <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+                        <property name="persistenceEnabled" value="false"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+        <!-- Explicitly configure TCP discovery SPI to provide a list of initial nodes. -->
+        <property name="discoverySpi">
+            <bean
+                    class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <property name="ipFinder">
+                    <!-- Uncomment static IP finder to enable static-based discovery of
+                        initial nodes. -->
+                    <bean
+                            class="org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder">
+                        <property name="addresses">
+                            <list>
+                               <value>127.0.0.1:47500..47509</value>
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <!-- Define individual Cache settings -->
+        <property name="cacheConfiguration">
+            <list>
+                <bean class="org.apache.ignite.configuration.CacheConfiguration">
+                    <property name="atomicityMode" value="TRANSACTIONAL"/>
+                    <property name="backups" value="1"/>
+                    <property name="cacheMode" value="PARTITIONED"/>
+                    <property name="sqlSchema" value="public"/>
+                    <property name="name" value="application_groups"/>
+                    <property name="readThrough" value="false"/>
+                    <property name="statisticsEnabled" value="true"/>
+                    <property name="writeBehindEnabled" value="false"/>
+                    <property name="writeThrough" value="false"/>
+                    <property name="indexedTypes">
+                        <list>
+                            <value type="java.lang.Class">java.lang.String</value>
+                            <value type="java.lang.Class">
+                                com.autozone.enterprise.catalog.data.model.ApplicationGroupModel
+                            </value>
+                        </list>
+                    </property>
+                    <property name="expiryPolicyFactory">
+                        <bean class="javax.cache.expiry.CreatedExpiryPolicy" factory-method="factoryOf">
+                            <constructor-arg>
+                                <bean class="javax.cache.expiry.Duration">
+                                    <constructor-arg value="DAYS"/>
+                                    <constructor-arg value="1"/>
+                                </bean>
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+</beans>
